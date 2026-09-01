@@ -3,9 +3,9 @@
 set -euo pipefail
 
 # Override when the GitHub remote is not the default:
-#   sudo DEVICE_POLICY_REPO=https://github.com/YOU/windows-agent.git bash -c \
-#     'curl -fsSL https://raw.githubusercontent.com/YOU/windows-agent/master/install/linux/bootstrap.sh | bash'
-REPO_URL="${DEVICE_POLICY_REPO:-https://github.com/chawkins/windows-agent.git}"
+#   sudo DEVICE_POLICY_REPO=https://github.com/YOU/kid-pc-manager.git bash -c \
+#     'curl -fsSL https://raw.githubusercontent.com/YOU/kid-pc-manager/master/install/linux/bootstrap.sh | bash'
+REPO_URL="${DEVICE_POLICY_REPO:-https://github.com/chawkins88/kid-pc-manager.git}"
 REPO_REF="${DEVICE_POLICY_REF:-master}"
 INSTALL_DIR="/opt/device-policy-agent"
 CONFIG_DIR="/etc/device-policy"

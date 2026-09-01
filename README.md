@@ -92,7 +92,7 @@ Download **`DevicePolicyHost-Setup.exe`** and run it as Administrator. The wizar
 After GitHub releases are set up:
 
 ```text
-https://github.com/chawkins/windows-agent/releases/latest/download/DevicePolicyHost-Setup.exe
+https://github.com/chawkins88/kid-pc-manager/releases/latest/download/DevicePolicyHost-Setup.exe
 ```
 
 Until then, grab the built file from `dist/DevicePolicyHost-Setup.exe` (also copied onto the Windows build machine under `C:\Users\Administrator\src\windows-agent\dist\`).
@@ -112,7 +112,7 @@ That produces one file: `dist\DevicePolicyHost-Setup.exe`.
 Kid account should not have sudo. On the kid PC (as an adult with sudo):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/chawkins/windows-agent/master/install/linux/bootstrap.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/chawkins88/kid-pc-manager/master/install/linux/bootstrap.sh | sudo bash
 ```
 
 That clones this repo, installs the agent under `/opt/device-policy-agent`, enables the systemd service, and writes `/etc/device-policy/agent.yaml` if it does not exist.
@@ -128,8 +128,8 @@ sudo systemctl status device-policy-agent
 If the GitHub URL is different, set it first:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOU/windows-agent/master/install/linux/bootstrap.sh \
-  | sudo DEVICE_POLICY_REPO=https://github.com/YOU/windows-agent.git bash
+curl -fsSL https://raw.githubusercontent.com/YOU/kid-pc-manager/master/install/linux/bootstrap.sh \
+  | sudo DEVICE_POLICY_REPO=https://github.com/YOU/kid-pc-manager.git bash
 ```
 
 From a local clone instead of curl:
