@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+venv/
+.venv/
+
+# Config with secrets (keep examples)
+config/agent.yaml
+
+# Logs and certs
+logs/
+*.log
+certs/
+
+# Downloaded Windows build tools
+install/windows/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

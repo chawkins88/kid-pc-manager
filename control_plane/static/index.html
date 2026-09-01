@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Policy Control Plane</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --online: #3dd68c;
+      --warning: #f5a524;
+      --offline: #f2555a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .card h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status.online { background: rgba(61,214,140,0.15); color: var(--online); }
+    .status.warning { background: rgba(245,165,36,0.15); color: var(--warning); }
+    .status.offline { background: rgba(242,85,90,0.15); color: var(--offline); }
+    .status.unknown { background: rgba(139,156,179,0.15); color: var(--muted); }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.75rem; line-height: 1.6; }
+    .alerts { margin-top: 2rem; }
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      border-left: 3px solid var(--border);
+    }
+    .alert.critical { border-color: var(--offline); background: rgba(242,85,90,0.08); }
+    .alert.warning { border-color: var(--warning); background: rgba(245,165,36,0.08); }
+    .alert.info { border-color: var(--online); background: rgba(61,214,140,0.08); }
+    .actions { margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    button:hover { background: #2563eb; }
+    input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .pin-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .pin-bar label { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Device Policy Control Plane</h1>
+  <p class="subtitle">Monitor kid devices and detect when agents go offline.</p>
+
+  <div class="pin-bar">
+    <label for="pin">Parent PIN:</label>
+    <input type="password" id="pin" placeholder="Required for actions">
+  </div>
+
+  <div class="grid" id="kids"></div>
+
+  <div class="alerts">
+    <h2 style="margin-bottom: 1rem;">Recent Alerts</h2>
+    <div id="alert-list"></div>
+  </div>
+
+  <script>
+    const pinInput = document.getElementById("pin");
+
+    async function fetchJSON(url, options) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || res.statusText);
+      }
+      return res.json();
+    }
+
+    function statusClass(status) {
+      return status || "unknown";
+    }
+
+    function renderKids(kids) {
+      const el = document.getElementById("kids");
+      if (!kids.length) {
+        el.innerHTML = '<div class="card"><p>No kid profiles found. Add YAML files to control_plane/profiles/.</p></div>';
+        return;
+      }
+      el.innerHTML = kids.map(k => {
+        const p = k.last_payload || {};
+        return `
+          <div class="card">
+            <h2>${k.display_name} <span class="status ${statusClass(k.status)}">${k.status}</span></h2>
+            <div class="meta">
+              <div>Device: ${k.device_ip}</div>
+              <div>Last seen: ${k.last_heartbeat ? new Date(k.last_heartbeat).toLocaleString() : "Never"}</div>
+              <div>Bedtime in: ${p.minutes_until_bedtime ?? "?"} min</div>
+              <div>Enforcing: ${p.is_enforcing ? "Yes" : "No"}</div>
+              <div>Blocked running: ${(p.running_blocked || []).join(", ") || "None"}</div>
+              <div>Missed heartbeats: ${k.missed_heartbeats}</div>
+            </div>
+            <div class="actions">
+              <button onclick="grantBonus('${k.kid_id}', 15)">+15 min</button>
+              <button onclick="grantBonus('${k.kid_id}', 30)">+30 min</button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    function renderAlerts(alerts) {
+      const el = document.getElementById("alert-list");
+      if (!alerts.length) {
+        el.innerHTML = '<p class="meta">No alerts yet.</p>';
+        return;
+      }
+      el.innerHTML = alerts.map(a => `
+        <div class="alert ${a.level}">
+          <strong>${a.kid_id}</strong> — ${a.message}
+          <span class="meta" style="display:block;margin-top:0.25rem">${new Date(a.timestamp).toLocaleString()}</span>
+        </div>
+      `).join("");
+    }
+
+    async function grantBonus(kidId, minutes) {
+      try {
+        await fetchJSON(`/api/v1/kids/${kidId}/bonus`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ minutes, pin: pinInput.value }),
+        });
+        alert(`Granted ${minutes} bonus minutes to ${kidId}`);
+        refresh();
+      } catch (e) {
+        alert("Failed: " + e.message);
+      }
+    }
+
+    async function refresh() {
+      try {
+        const [kids, alerts] = await Promise.all([
+          fetchJSON("/api/v1/kids"),
+          fetchJSON("/api/v1/alerts"),
+        ]);
+        renderKids(kids);
+        renderAlerts(alerts);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 15000);
+  </script>
+</body>
+</html>

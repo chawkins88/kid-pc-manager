@@ -1,0 +1,17 @@
+kid_id: alex
+display_name: Alex
+device_ip: 192.168.1.51
+agent_port: 8443
+api_key: change-me-alex-device-key
+schedule:
+  bedtime: "21:30"
+  timezone: America/New_York
+  warnings_minutes: [15, 5, 1]
+blocked_processes:
+  - RobloxPlayerBeta.exe
+  - RobloxPlayer
+  - steam.exe
+  - steam
+enforcement:
+  grace_minutes: 5
+  check_interval_seconds: 10

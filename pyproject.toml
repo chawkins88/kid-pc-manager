@@ -1,0 +1,30 @@
+[project]
+name = "device-policy-agent"
+version = "0.1.0"
+description = "Cross-platform parental control agent with LAN control plane"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "psutil>=6.0.0",
+    "pyyaml>=6.0.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "httpx>=0.27.0",
+    "bcrypt>=4.2.0",
+    "apscheduler>=3.10.0",
+    "python-multipart>=0.0.12",
+]
+
+[project.scripts]
+device-policy-agent = "agent.main:main"
+device-policy-control = "control_plane.main:main"
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent*", "control_plane*"]

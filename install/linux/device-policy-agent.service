@@ -1,0 +1,15 @@
+[Unit]
+Description=Device Policy Agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/device-policy-agent
+Environment=DEVICE_POLICY_CONFIG=/etc/device-policy/agent.yaml
+ExecStart=/opt/device-policy-agent/venv/bin/python -m agent.main -c /etc/device-policy/agent.yaml
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

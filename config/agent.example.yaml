@@ -1,0 +1,24 @@
+kid_id: emma
+display_name: Emma
+api_key: change-me-emma-device-key
+control_plane_url: http://192.168.1.10:8080
+
+schedule:
+  bedtime: "21:00"
+  timezone: America/New_York
+  warnings_minutes: [15, 5, 1]
+
+blocked_processes:
+  - RobloxPlayerBeta.exe
+  - steam.exe
+  - steam
+
+enforcement:
+  grace_minutes: 5
+  check_interval_seconds: 10
+
+api:
+  host: 0.0.0.0
+  port: 8443
+  # tls_cert: certs/agent.crt
+  # tls_key: certs/agent.key
